@@ -1,0 +1,109 @@
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+require('dotenv').config();
+const fs = require('fs');
+
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+
+const cybersourceRestApi = require('cybersource-rest-client');
+const filePath = path.resolve('./Configuration.js');
+const {httpSigConfiguration} = require(filePath);
+
+const app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
+
+app.get('/ucoverview', function (req, res) {
+  try {
+    //can make configuration changes in the json file or via the UI
+    const filePath = path.join(__dirname, './Data/default-uc-capture-context-request.json');
+    const fileContent = fs.readFileSync(filePath, "utf-8");
+    const jsonRequest = JSON.parse(fileContent);                                      //@stan
+    jsonRequest.orderInformation.amountDetails.currency = process.env.TXN_CURRENCY;   //@stan
+    const displayContent = JSON.stringify(jsonRequest, null, 4);                    //@stan
+    res.render('uc-overview', {jsonRequest: displayContent});                       //@stan
+  } catch (error) {
+      res.send('Error : ' + error + ' Error status code : ' + error.statusCode);
+  }
+});
+
+
+app.post('/capture-context', function (req, res) {
+  try {
+    // add your merchant id and keys in the Configuration 
+    const configObject = new httpSigConfiguration();
+    const apiClient = new cybersourceRestApi.ApiClient();
+    const requestObj = JSON.parse(req.body.captureContextRequest);
+    const instance = new cybersourceRestApi.UnifiedCheckoutCaptureContextApi(configObject, apiClient);
+
+    instance.generateUnifiedCheckoutCaptureContext(requestObj, function (error, data, response) {
+      if (error) {
+        console.error('\nError : ' + JSON.stringify(error));
+      }
+      else if (data) {
+        const decodedData =  JSON.parse(Buffer.from(data.split('.')[1], 'base64').toString());
+        res.render('capture-context', {captureConext: data, decodedData: JSON.stringify(decodedData)});
+      }
+    });
+	}
+	catch (error) {
+		console.log('\nException on calling the API : ' + error);
+	}
+});
+
+app.post('/checkout', function (req, res) {
+  try {
+    const decodeData = JSON.parse(req.body.captureContextDecoded);
+    const captureContext = req.body.captureContext;
+    //extract the client library URL and the integrity to load the SDK
+    const url = decodeData.ctx[0].data.clientLibrary;
+    const clientLibraryIntegrity = decodeData.ctx[0].data.clientLibraryIntegrity
+    res.render('checkout', {url: JSON.stringify(url), clientLibraryIntegrity: JSON.stringify(clientLibraryIntegrity), captureContext: captureContext, tranCurr: decodeData.ctx[0].data.orderInformation.amountDetails.currency, tranAmt: decodeData.ctx[0].data.orderInformation.amountDetails.totalAmount});
+  } catch(error) {
+      res.send('Error : ' + error + ' Error status code : ' + error.statusCode);
+  }
+});
+
+app.post('/completePaymentResponse', function (req, res) {
+  try {
+    const response = req.body.response.split('.')[1];
+    const decodedData =  JSON.parse(Buffer.from(response, 'base64').toString());
+    res.render('completeResponse', { response:  req.body.response, decodedData: JSON.stringify(decodedData)} );                
+  } catch (error) {
+      res.send('Error : ' + error + ' Error status code : ' + error.statusCode);
+  }  
+});  
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;

@@ -1,0 +1,53 @@
+{
+    "targetOrigins" : [ "https://localhost:3000" ],
+    "clientVersion" : "0.26",
+    "allowedCardNetworks" : [ "VISA", "MASTERCARD"],
+    "allowedPaymentTypes" : ["PANENTRY"],
+    "country" : "HK",
+    "locale" : "en_US",
+    "captureMandate" : {
+        "billingType" : "FULL",
+        "requestEmail" : true,
+        "requestPhone" : true,
+        "requestShipping" : true,
+        "shipToCountries" : [ "CN", "HK" ],
+        "showAcceptedNetworkIcons" : true
+    },
+    "completeMandate": {
+        "type": "AUTH",
+        "decisionManager": true
+    },
+    "orderInformation" : {
+        "amountDetails" : {
+            "totalAmount" : "10.00",
+            "currency" : "USD"
+        },
+        "billTo" : {
+            "address1" : "Suite A136, 16/F ",
+            "administrativeArea" : "HK",
+            "buildingNumber" : "Gateway 5",
+            "country" : "CN",
+            "district" : "Tsimshatsui",
+            "locality" : "Kowloon",
+            "postalCode" : "00000",
+            "email" : "paul.maesor@fiserv.com",
+            "firstName" : "Paul",
+            "lastName" : "Maesor",
+            "middleName" : "F",
+            "nameSuffix" : "Jr",
+            "title" : "Mr",
+            "phoneNumber" : "91239123"
+        },
+        "shipTo" : {
+            "address1" : "Suite A136, 16/F ",
+            "administrativeArea" : "HK",
+            "buildingNumber" : "Gateway 5",
+            "country" : "CN",
+            "district" : "Tsimshatsui",
+            "locality" : "Kowloon",
+            "postalCode" : "00000",
+            "firstName" : "Paul",
+            "lastName" : "Maesor"
+        }
+    }
+}

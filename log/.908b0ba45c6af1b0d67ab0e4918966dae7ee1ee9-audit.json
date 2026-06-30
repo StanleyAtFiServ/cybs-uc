@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 10
+    },
+    "auditLog": "log\\.908b0ba45c6af1b0d67ab0e4918966dae7ee1ee9-audit.json",
+    "files": [
+        {
+            "date": 1782445395655,
+            "name": "log\\cybs-2026-06-26.log",
+            "hash": "e05c8d27d8422e5e198798b7971b289cee1f84229b2f78afdac61a7e9130c3fa"
+        },
+        {
+            "date": 1782704941121,
+            "name": "log\\cybs-2026-06-29.log",
+            "hash": "f9828e930890a91cb76ed3ad78463670aa7d929c0c840fdc29091c92bc66be2c"
+        },
+        {
+            "date": 1782788389149,
+            "name": "log\\cybs-2026-06-30.log",
+            "hash": "8b8e2ddf15547f6c8e916139a8d9053c53bade0882e6470f90fa25e377ac1ad0"
+        }
+    ],
+    "hashType": "sha256"
+}
